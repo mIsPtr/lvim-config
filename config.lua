@@ -2,7 +2,6 @@
  THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
  `lvim` is the global options object
 ]]
-
 -- vim options
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -113,8 +112,9 @@ lvim.plugins = {
         -- end
     },
     { "mg979/vim-visual-multi" },
-    { "catppuccin/nvim", name = "catppuccin" },
+    { "catppuccin/nvim",       name = "catppuccin" },
     { "wakatime/vim-wakatime" },
+    { "aduros/ai.vim" },
 }
 
 -- -- Autocommands (`:help autocmd`) <https://neovim.io/doc/user/autocmd.html>
