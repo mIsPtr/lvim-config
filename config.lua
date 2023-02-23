@@ -69,13 +69,25 @@ lvim.builtin.treesitter.auto_install = true
 
 -- -- you can set a custom on_attach function that will be used for all the language servers
 -- -- See <https://github.com/neovim/nvim-lspconfig#keybindings-and-completion>
--- lvim.lsp.on_attach_callback = function(client, bufnr)
---   local function buf_set_option(...)
---     vim.api.nvim_buf_set_option(bufnr, ...)
---   end
---   --Enable completion triggered by <c-x><c-o>
---   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
--- end
+lvim.lsp.on_attach_callback = function(client, bufnr)
+    -- local function buf_set_option(...)
+    --     vim.api.nvim_buf_set_option(bufnr, ...)
+    -- end
+    -- --Enable completion triggered by <c-x><c-o>
+    -- buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
+    if client.name == 'clangd' then
+        local cmakedir = vim.fn.findfile('CMakeLists.txt', vim.fn.getcwd() .. ";")
+        if cmakedir ~= "" then
+            vim.keymap.set("n", "<C-b>", function()
+                vim.cmd('!cd build && make')
+            end, { buffer = true })
+            vim.keymap.set({ "n", "i" }, "<F5>", function()
+                vim.cmd('!cd build && make run')
+            end, { buffer = true })
+            vim.keymap.set("n", "<leader><Tab>", ":ClangdSwitchSourceHeader<CR>", { buffer = true })
+        end
+    end
+end
 
 -- -- linters and formatters <https://www.lunarvim.org/docs/languages#lintingformatting>
 local formatters = require "lvim.lsp.null-ls.formatters"
@@ -115,6 +127,38 @@ lvim.plugins = {
     { "catppuccin/nvim",       name = "catppuccin" },
     { "wakatime/vim-wakatime" },
     { "aduros/ai.vim" },
+}
+
+local dap = require('dap')
+dap.adapters.cppdbg = {
+    id = 'cppdbg',
+    type = 'executable',
+    command = '/home/misman/Downloads/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
+}
+
+dap.configurations.cpp = {
+    {
+        name = "Launch file",
+        type = "cppdbg",
+        request = "launch",
+        program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopAtEntry = true,
+    },
+    {
+        name = 'Attach to gdbserver :1234',
+        type = 'cppdbg',
+        request = 'launch',
+        MIMode = 'gdb',
+        miDebuggerServerAddress = 'localhost:1234',
+        miDebuggerPath = '/usr/bin/gdb',
+        cwd = '${workspaceFolder}',
+        program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+    },
 }
 
 -- -- Autocommands (`:help autocmd`) <https://neovim.io/doc/user/autocmd.html>
